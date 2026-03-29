@@ -7,14 +7,43 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+
+    <!-- Auth Ekranı -->
+    <div id="auth-screen" class="container">
         <h1>Yapılacaklar</h1>
+        <div id="auth-message" class="auth-message" hidden></div>
+        <div id="auth-tabs">
+            <button class="tab active" data-tab="login">Giriş Yap</button>
+            <button class="tab" data-tab="signup">Kayıt Ol</button>
+        </div>
+        <form id="login-form" class="auth-form">
+            <input type="email" id="login-email" placeholder="E-posta" required>
+            <input type="password" id="login-password" placeholder="Şifre" required minlength="6">
+            <button type="submit">Giriş Yap</button>
+        </form>
+        <form id="signup-form" class="auth-form" hidden>
+            <input type="email" id="signup-email" placeholder="E-posta" required>
+            <input type="password" id="signup-password" placeholder="Şifre (min 6 karakter)" required minlength="6">
+            <button type="submit">Kayıt Ol</button>
+        </form>
+    </div>
+
+    <!-- Todo Ekranı -->
+    <div id="app-screen" class="container" hidden>
+        <div class="app-header">
+            <h1>Yapılacaklar</h1>
+            <div class="user-info">
+                <span id="user-email"></span>
+                <button id="logout-btn">Çıkış</button>
+            </div>
+        </div>
         <form id="todo-form">
             <input type="text" id="todo-input" placeholder="Yeni görev ekle..." autocomplete="off">
             <button type="submit">Ekle</button>
         </form>
         <ul id="todo-list"></ul>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
