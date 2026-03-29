@@ -49,7 +49,7 @@ signupForm.addEventListener("submit", async (e) => {
     const btn = signupForm.querySelector("button");
     btn.disabled = true;
 
-    const res = await fetch(`${AUTH_URL}/signup`, {
+    const res = await fetch(`${AUTH_URL}/signup?redirect_to=${encodeURIComponent("https://melih-collab.github.io/Gun3/")}`, {
         method: "POST",
         headers: { "apikey": SUPABASE_KEY, "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
