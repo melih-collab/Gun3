@@ -1,11 +1,49 @@
+const SUPABASE_URL = "https://bkpevbxfximqsjwtsywy.supabase.co/rest/v1";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrcGV2YnhmeGltcXNqd3RzeXd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MDA4MjIsImV4cCI6MjA5MDM3NjgyMn0.x_8hcW6saHiiwkeNuqxDZOcAvcuyppJocu0PsvKTJc8";
+
+const headers = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": `Bearer ${SUPABASE_KEY}`,
+    "Content-Type": "application/json",
+    "Prefer": "return=representation"
+};
+
 const form = document.getElementById("todo-form");
 const input = document.getElementById("todo-input");
 const list = document.getElementById("todo-list");
 
-let todos = JSON.parse(localStorage.getItem("todos")) || [];
+let todos = [];
 
-function save() {
-    localStorage.setItem("todos", JSON.stringify(todos));
+async function fetchTodos() {
+    const res = await fetch(`${SUPABASE_URL}/todos?order=created_at.asc`, { headers });
+    todos = await res.json();
+    render();
+}
+
+async function addTodo(text) {
+    const res = await fetch(`${SUPABASE_URL}/todos`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ text, done: false })
+    });
+    const [todo] = await res.json();
+    todos.push(todo);
+    render();
+}
+
+async function updateTodo(id, updates) {
+    await fetch(`${SUPABASE_URL}/todos?id=eq.${id}`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify(updates)
+    });
+}
+
+async function deleteTodo(id) {
+    await fetch(`${SUPABASE_URL}/todos?id=eq.${id}`, {
+        method: "DELETE",
+        headers
+    });
 }
 
 function render() {
@@ -17,10 +55,10 @@ function render() {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = todo.done;
-        checkbox.addEventListener("change", () => {
+        checkbox.addEventListener("change", async () => {
             todos[i].done = checkbox.checked;
-            save();
             render();
+            await updateTodo(todo.id, { done: checkbox.checked });
         });
 
         const span = document.createElement("span");
@@ -35,10 +73,10 @@ function render() {
         const del = document.createElement("button");
         del.className = "delete-btn";
         del.textContent = "\u00d7";
-        del.addEventListener("click", () => {
+        del.addEventListener("click", async () => {
             todos.splice(i, 1);
-            save();
             render();
+            await deleteTodo(todo.id);
         });
 
         li.append(checkbox, span, editBtn, del);
@@ -59,11 +97,11 @@ function startEdit(li, i) {
     saveBtn.className = "save-btn";
     saveBtn.textContent = "Kaydet";
 
-    function saveEdit() {
+    async function saveEdit() {
         const newText = editInput.value.trim();
         if (newText) {
             todos[i].text = newText;
-            save();
+            await updateTodo(todos[i].id, { text: newText });
         }
         render();
     }
@@ -83,10 +121,8 @@ form.addEventListener("submit", (e) => {
     e.preventDefault();
     const text = input.value.trim();
     if (!text) return;
-    todos.push({ text, done: false });
-    save();
-    render();
     input.value = "";
+    addTodo(text);
 });
 
-render();
+fetchTodos();
